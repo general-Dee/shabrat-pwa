@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa";
 import { Product, getProductImage } from "@/lib/products";
 
-const WHATSAPP_NUMBER = "2348012345678"; // Replace with actual
+const WHATSAPP_NUMBER = "2348012345678"; // ← Replace with real number
 
 interface Props {
   product: Product;
@@ -49,7 +49,7 @@ export default function ProductCard({ product }: Props) {
           className={`object-contain p-4 transition-transform duration-500 group-hover:scale-105 ${
             isImageLoaded ? "opacity-100" : "opacity-0"
           }`}
-          onLoadingComplete={() => setIsImageLoaded(true)}
+          onLoad={() => setIsImageLoaded(true)}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {/* Category tag */}
