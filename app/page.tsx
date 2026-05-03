@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaTruck, FaBox, FaCheckCircle, FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, FaLanguage } from "react-icons/fa";
 import ProductCard from "@/components/ProductCard";
 import BackToTop from "@/components/BackToTop";
+import BulkOrderModal from "@/components/BulkOrderModal";
 import { products } from "@/lib/products";
 
 type Language = "en" | "ha";
@@ -14,6 +15,7 @@ const translations = {
   en: {
     brandSub: "Bulk food supplies | Kaduna",
     callUs: "Call Us",
+    bulkOrder: "Bulk Order",
     heroTitle: "Trusted Supplier of",
     heroTitleSpan: "Premium Consumables",
     heroDesc: "Wholesale & retail – rice, flour, oil, noodles & more. Reliable delivery across Kaduna State.",
@@ -34,6 +36,7 @@ const translations = {
   ha: {
     brandSub: "Kayan abinci a jumla | Kaduna",
     callUs: "Kira mu",
+    bulkOrder: "Oda mai yawa",
     heroTitle: "Aminci Mai Samar da",
     heroTitleSpan: "Kayan Abinci Na Musamman",
     heroDesc: "Jumla da dillali – shinkafa, gari, mai, noodles da sauransu. Isarwa mai aminci a fadin Jihar Kaduna.",
@@ -56,6 +59,7 @@ const translations = {
 export default function Home() {
   const [language, setLanguage] = useState<Language>("en");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   // Load language from localStorage on mount
   useEffect(() => {
@@ -87,6 +91,12 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50/20 to-white">
       <ToastContainer theme="colored" position="bottom-center" autoClose={3000} />
       <BackToTop />
+      <BulkOrderModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        products={products}
+        language={language}
+      />
 
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -105,6 +115,16 @@ export default function Home() {
               <FaLanguage />
               <span className="font-medium">{language === "en" ? "Hausa" : "English"}</span>
             </button>
+
+            {/* Bulk Order Button */}
+            <button
+              onClick={() => setIsBulkModalOpen(true)}
+              className="flex items-center gap-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-1.5 rounded-full transition"
+            >
+              <FaBox />
+              <span className="font-medium">{t.bulkOrder}</span>
+            </button>
+
             <a href="tel:+2349015751371" className="flex items-center gap-1 text-gray-700 hover:text-emerald-600">
               <FaPhoneAlt className="text-emerald-600" size={12} />
               <span className="hidden sm:inline">{t.callUs}</span>
