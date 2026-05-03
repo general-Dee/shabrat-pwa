@@ -43,7 +43,7 @@ export const products: Product[] = [
     price: 58500,
     unit: "50kg bag",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801135/WhatsApp_Image_2026-05-02_at_21.13.47_1_ovt4as.jpg",
     _id: "4"
   },
   {
@@ -52,7 +52,7 @@ export const products: Product[] = [
     price: 59000,
     unit: "50kg bag",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777803178/vital_rice_xvz3ff.webp",
     _id: "5"
   },
   {
@@ -61,7 +61,7 @@ export const products: Product[] = [
     price: 56000,
     unit: "50kg bag",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801219/WhatsApp_Image_2026-05-02_at_21.18.02_1_cbuzkt.jpg",
     _id: "6"
   },
   {
@@ -88,7 +88,7 @@ export const products: Product[] = [
     price: 26000,
     unit: "25kg bag",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801184/WhatsApp_Image_2026-05-02_at_21.14.08_5_zntvlf.jpg",
     _id: "9"
   },
   {
@@ -97,7 +97,7 @@ export const products: Product[] = [
     price: 50500,
     unit: "50kg bag",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801152/WhatsApp_Image_2026-05-02_at_21.14.08_3_if5bsd.jpg",
     _id: "10"
   },
   {
@@ -106,7 +106,7 @@ export const products: Product[] = [
     price: 63000,
     unit: "per carton",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801195/WhatsApp_Image_2026-05-02_at_21.17.06_2_xrqk9k.jpg",
     _id: "11"
   },
   {
@@ -115,7 +115,7 @@ export const products: Product[] = [
     price: 14500,
     unit: "carton",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801704/indomi_superpack_b7hmqb.webp",
     _id: "12"
   },
   {
@@ -124,11 +124,11 @@ export const products: Product[] = [
     price: 10000,
     unit: "carton",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777802759/indomi-smallpack_tdvdpi.webp",
     _id: "13"
   },
   {
-    name: "Crown spaghetti",
+    name: "Mai kwabo slim spaghetti",
     category: "🍜 Noodles & Pasta",
     price: 18000,
     unit: "carton",
@@ -137,7 +137,7 @@ export const products: Product[] = [
     _id: "14"
   },
   {
-    name: "Macaroni crown",
+    name: "IRS pasta slim",
     category: "🍜 Noodles & Pasta",
     price: 18000,
     unit: "carton",
@@ -169,7 +169,7 @@ export const products: Product[] = [
     price: 58500,
     unit: "25 litres",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801207/WhatsApp_Image_2026-05-02_at_21.17.06_3_xeugbt.jpg",
     _id: "18"
   },
   {
@@ -191,12 +191,12 @@ export const products: Product[] = [
     _id: "20"
   },
   {
-    name: "Zyn Shea butter cooking",
+    name: "Zyn Shea butter",
     category: "🛢️ Oils",
     price: 37000,
     unit: "25 litres",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801233/WhatsApp_Image_2026-05-02_at_21.20.06_idgukn.jpg",
     _id: "21"
   },
   {
@@ -214,7 +214,7 @@ export const products: Product[] = [
     price: 2100,
     unit: "per pack",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777801245/WhatsApp_Image_2026-05-02_at_21.23.31_vyv6tp.jpg",
     _id: "23"
   },
   {
@@ -223,7 +223,7 @@ export const products: Product[] = [
     price: 23000,
     unit: "carton",
     imagePublicId: "",
-    imageUrl: "/placeholder.png",
+    imageUrl: "https://res.cloudinary.com/dhysswdl7/image/upload/v1777802894/Issa_tasty_tomato_paste_400g_yjvq1j.webp",
     _id: "24"
   }
 ];

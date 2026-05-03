@@ -5,13 +5,14 @@ import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa";
 import { Product, getProductImage } from "@/lib/products";
 
-const WHATSAPP_NUMBER = "2348012345678"; // ← Replace with real number
+const WHATSAPP_NUMBER = "2349015751371";
 
 interface Props {
   product: Product;
+  language: "en" | "ha"; // new prop
 }
 
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({ product, language }: Props) {
   const [quantity, setQuantity] = useState(1);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -20,12 +21,16 @@ export default function ProductCard({ product }: Props) {
 
   const generateWhatsAppLink = () => {
     const totalPrice = product.price * quantity;
-    const message = `Hello Shabrat Investment,%0A%0AI would like to order:%0A📦 *${product.name}*%0A🔢 Quantity: ${quantity} ${product.unit}%0A💰 Total: ₦${totalPrice.toLocaleString()}%0A%0APlease provide payment details and delivery options (Kaduna State).%0A%0AThank you!`;
+    const message = language === "en"
+      ? `Hello Shabrat Investment,%0A%0AI would like to order:%0A📦 *${product.name}*%0A🔢 Quantity: ${quantity} ${product.unit}%0A💰 Total: ₦${totalPrice.toLocaleString()}%0A%0APlease provide payment details and delivery options (Kaduna State).%0A%0AThank you!`
+      : `Assalamu alaikum Shabrat Investment,%0A%0AIna son yin oda:%0A📦 *${product.name}*%0A🔢 Adadi: ${quantity} ${product.unit}%0A💰 Jimlar kuɗi: ₦${totalPrice.toLocaleString()}%0A%0ADon Allah ku aiko min da hanyoyin biyan kuɗi da isar da kaya (Jihar Kaduna).%0A%0ANagode!`;
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
   };
 
   const handleOrder = () => {
-    toast.success(`Added ${quantity} × ${product.name} to WhatsApp order`, {
+    toast.success(language === "en"
+      ? `Added ${quantity} × ${product.name} to WhatsApp order`
+      : `An ƙara ${quantity} × ${product.name} cikin oda ta WhatsApp`, {
       position: "bottom-center",
       autoClose: 3000,
       style: { background: "#059669", color: "#fff" },
@@ -52,7 +57,6 @@ export default function ProductCard({ product }: Props) {
           onLoad={() => setIsImageLoaded(true)}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        {/* Category tag */}
         <div className="absolute top-2 left-2 z-10">
           <span className="inline-block bg-white/90 backdrop-blur-sm text-emerald-700 text-[11px] font-semibold px-2 py-0.5 rounded shadow-sm">
             {product.category.replace(/[^\w\s]/g, '')}
@@ -71,29 +75,18 @@ export default function ProductCard({ product }: Props) {
           <span className="text-[11px] text-gray-400">/ {product.unit}</span>
         </div>
 
-        {/* Quantity selector and button */}
         <div className="mt-4 flex items-center justify-between gap-2">
           <div className="flex items-center border border-gray-200 rounded-md bg-white">
-            <button
-              onClick={decrement}
-              className="px-2 py-1 text-gray-600 hover:bg-gray-100 text-sm font-bold"
-            >
-              −
-            </button>
+            <button onClick={decrement} className="px-2 py-1 text-gray-600 hover:bg-gray-100 text-sm font-bold">−</button>
             <span className="px-3 py-1 text-center w-10 text-sm font-medium">{quantity}</span>
-            <button
-              onClick={increment}
-              className="px-2 py-1 text-gray-600 hover:bg-gray-100 text-sm font-bold"
-            >
-              +
-            </button>
+            <button onClick={increment} className="px-2 py-1 text-gray-600 hover:bg-gray-100 text-sm font-bold">+</button>
           </div>
           <button
             onClick={handleOrder}
             className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-1.5 px-3 rounded-md transition flex items-center justify-center gap-1"
           >
             <FaWhatsapp size={14} />
-            <span>Order</span>
+            <span>{language === "en" ? "Order" : "Oda"}</span>
           </button>
         </div>
       </div>

@@ -1,14 +1,77 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaTruck, FaBox, FaCheckCircle, FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt } from "react-icons/fa";
+import { FaTruck, FaBox, FaCheckCircle, FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, FaLanguage } from "react-icons/fa";
 import ProductCard from "@/components/ProductCard";
 import BackToTop from "@/components/BackToTop";
 import { products } from "@/lib/products";
 
+type Language = "en" | "ha";
+
+// Translation dictionary
+const translations = {
+  en: {
+    brandSub: "Bulk food supplies | Kaduna",
+    callUs: "Call Us",
+    heroTitle: "Trusted Supplier of",
+    heroTitleSpan: "Premium Consumables",
+    heroDesc: "Wholesale & retail – rice, flour, oil, noodles & more. Reliable delivery across Kaduna State.",
+    freeDelivery: "Free delivery ≥ ₦100k",
+    bulkDiscounts: "Bulk discounts",
+    nitda: "NITDA Digital Trustmark",
+    trustBar: "100% secure ordering | Instant confirmation | 5+ years serving Kaduna",
+    noProducts: "No products in this category.",
+    footerTagline: "Premium consumables supplier based in Kaduna State, Nigeria.",
+    contact: "Contact",
+    orderViaWhatsApp: "Order via WhatsApp",
+    location: "Location",
+    deliveryInfo: "Delivery across Kaduna Metro & surrounding areas.",
+    copyright: "© 2025 Shabrat Investment. All rights reserved. Prices subject to change. Free delivery on orders above ₦100,000 within Kaduna Metro.",
+    orderBtn: "Order",
+    loading: "Loading...",
+  },
+  ha: {
+    brandSub: "Kayan abinci a jumla | Kaduna",
+    callUs: "Kira mu",
+    heroTitle: "Aminci Mai Samar da",
+    heroTitleSpan: "Kayan Abinci Na Musamman",
+    heroDesc: "Jumla da dillali – shinkafa, gari, mai, noodles da sauransu. Isarwa mai aminci a fadin Jihar Kaduna.",
+    freeDelivery: "Isarwa kyauta sama da ₦100k",
+    bulkDiscounts: "Rangwamen jumla",
+    nitda: "NITDA Amincewa ta Dijital",
+    trustBar: "100% amintaccen oda | Tabbatarwa take | Shekaru 5+ muna hidimar Kaduna",
+    noProducts: "Babu kayayyaki a wannan rukuni.",
+    footerTagline: "Mai samar da kayan abinci na musamman a Jihar Kaduna, Nijeriya.",
+    contact: "Tuntube mu",
+    orderViaWhatsApp: "Yi oda ta WhatsApp",
+    location: "Wuri",
+    deliveryInfo: "Isarwa a cikin Kaduna Metro da kewaye.",
+    copyright: "© 2025 Shabrat Investment. Kowane haƙƙi mallake ne. Farashin na iya canzawa. Isarwa kyauta ga oda sama da ₦100,000 a cikin Kaduna Metro.",
+    orderBtn: "Oda",
+    loading: "Ana lodawa...",
+  },
+};
+
 export default function Home() {
+  const [language, setLanguage] = useState<Language>("en");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
+  // Load language from localStorage on mount
+  useEffect(() => {
+    const savedLang = localStorage.getItem("shabrat-lang") as Language | null;
+    if (savedLang && (savedLang === "en" || savedLang === "ha")) {
+      setLanguage(savedLang);
+    }
+  }, []);
+
+  const toggleLanguage = () => {
+    const newLang = language === "en" ? "ha" : "en";
+    setLanguage(newLang);
+    localStorage.setItem("shabrat-lang", newLang);
+  };
+
+  const t = translations[language];
 
   const categories = useMemo(() => {
     const cats = new Set(products.map((p) => p.category));
@@ -30,14 +93,23 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-emerald-800">Shabrat<span className="text-amber-600">Investment</span></h1>
-            <p className="text-xs text-gray-500 hidden sm:block">Bulk food supplies | Kaduna</p>
+            <p className="text-xs text-gray-500 hidden sm:block">{t.brandSub}</p>
           </div>
           <div className="flex items-center gap-4 text-sm">
-            <a href="tel:+2348123456789" className="flex items-center gap-1 text-gray-700 hover:text-emerald-600">
+            {/* Language Toggle Button */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-full transition"
+              aria-label="Toggle language"
+            >
+              <FaLanguage />
+              <span className="font-medium">{language === "en" ? "Hausa" : "English"}</span>
+            </button>
+            <a href="tel:+2349015751371" className="flex items-center gap-1 text-gray-700 hover:text-emerald-600">
               <FaPhoneAlt className="text-emerald-600" size={12} />
-              <span className="hidden sm:inline">Call Us</span>
+              <span className="hidden sm:inline">{t.callUs}</span>
             </a>
-            <a href="https://wa.me/2348012345678" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-green-700 transition">
+            <a href="https://wa.me/2349015751371" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-green-700 transition">
               <FaWhatsapp />
               <span>WhatsApp</span>
             </a>
@@ -45,24 +117,26 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section – refined with better spacing */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-r from-emerald-900 to-emerald-800 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
         <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-20 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Trusted Supplier of <span className="text-amber-300">Premium Consumables</span></h1>
-          <p className="text-lg md:text-xl mt-4 opacity-90 max-w-2xl mx-auto">Wholesale & retail – rice, flour, oil, noodles & more. Reliable delivery across Kaduna State.</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+            {t.heroTitle} <span className="text-amber-300">{t.heroTitleSpan}</span>
+          </h1>
+          <p className="text-lg md:text-xl mt-4 opacity-90 max-w-2xl mx-auto">{t.heroDesc}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm">
               <FaTruck className="text-amber-300" />
-              <span>Free delivery ≥ ₦100k</span>
+              <span>{t.freeDelivery}</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm">
               <FaBox className="text-amber-300" />
-              <span>Bulk discounts</span>
+              <span>{t.bulkDiscounts}</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm">
               <FaCheckCircle className="text-amber-300" />
-              <span>NITDA Digital Trustmark</span>
+              <span>{t.nitda}</span>
             </div>
           </div>
         </div>
@@ -71,10 +145,10 @@ export default function Home() {
 
       {/* Trust Bar */}
       <div className="bg-amber-50 border-b border-amber-100 py-2 text-center text-sm text-gray-700">
-        <span className="inline-flex items-center gap-2"><FaCheckCircle className="text-emerald-600" /> 100% secure ordering &nbsp;|&nbsp; <FaWhatsapp className="text-green-600" /> Instant confirmation &nbsp;|&nbsp; 🏆 5+ years serving Kaduna</span>
+        <span className="inline-flex items-center gap-2">{t.trustBar}</span>
       </div>
 
-      {/* Category Filter – horizontal scroll on mobile */}
+      {/* Category Filter */}
       <div className="sticky top-[57px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200 py-3 px-4">
         <div className="max-w-7xl mx-auto overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 min-w-max">
@@ -99,37 +173,37 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product._id} product={product} />
+            <ProductCard key={product._id} product={product} language={language} />
           ))}
         </div>
         {filteredProducts.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">No products in this category.</p>
+            <p className="text-gray-500 text-lg">{t.noProducts}</p>
           </div>
         )}
       </div>
 
-      {/* Footer with business details */}
+      {/* Footer */}
       <footer className="bg-gray-900 text-white pt-10 pb-6">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
             <div>
               <h3 className="font-bold text-lg">Shabrat Investment</h3>
-              <p className="text-gray-400 text-sm mt-2">Premium consumables supplier based in Kaduna State, Nigeria.</p>
+              <p className="text-gray-400 text-sm mt-2">{t.footerTagline}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-amber-300">Contact</h4>
-              <p className="text-gray-400 text-sm mt-2 flex items-center justify-center md:justify-start gap-2"><FaPhoneAlt /> +234 (0) 812 345 6789</p>
-              <p className="text-gray-400 text-sm flex items-center justify-center md:justify-start gap-2"><FaWhatsapp /> Order via WhatsApp</p>
+              <h4 className="font-semibold text-amber-300">{t.contact}</h4>
+              <p className="text-gray-400 text-sm mt-2 flex items-center justify-center md:justify-start gap-2"><FaPhoneAlt /> +234 (0) 901 575 1371</p>
+              <p className="text-gray-400 text-sm flex items-center justify-center md:justify-start gap-2"><FaWhatsapp /> {t.orderViaWhatsApp}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-amber-300">Location</h4>
+              <h4 className="font-semibold text-amber-300">{t.location}</h4>
               <p className="text-gray-400 text-sm mt-2 flex items-center justify-center md:justify-start gap-2"><FaMapMarkerAlt /> Kaduna, Nigeria</p>
-              <p className="text-gray-400 text-sm">Delivery across Kaduna Metro & surrounding areas.</p>
+              <p className="text-gray-400 text-sm">{t.deliveryInfo}</p>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-500 text-xs">
-            © 2025 Shabrat Investment. All rights reserved. Prices subject to change. Free delivery on orders above ₦100,000 within Kaduna Metro.
+            {t.copyright}
           </div>
         </div>
       </footer>
