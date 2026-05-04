@@ -2,7 +2,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaTruck, FaBox, FaCheckCircle, FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, FaLanguage } from "react-icons/fa";
+import { FaTruck, FaBox, FaCheckCircle, FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, FaLanguage, FaSearch, FaTimes } from "react-icons/fa";
 import ProductCard from "@/components/ProductCard";
 import BackToTop from "@/components/BackToTop";
 import BulkOrderModal from "@/components/BulkOrderModal";
@@ -32,6 +32,8 @@ const translations = {
     copyright: "© 2025 Shabrat Investment. All rights reserved. Prices subject to change. Free delivery on orders above ₦100,000 within Kaduna Metro.",
     orderBtn: "Order",
     loading: "Loading...",
+    searchPlaceholder: "Search products...",
+    clearSearch: "Clear",
   },
   ha: {
     brandSub: "Kayan abinci a jumla | Kaduna",
@@ -53,16 +55,18 @@ const translations = {
     copyright: "© 2025 Shabrat Investment. Kowane haƙƙi mallake ne. Farashin na iya canzawa. Isarwa kyauta ga oda sama da ₦100,000 a cikin Kaduna Metro.",
     orderBtn: "Oda",
     loading: "Ana lodawa...",
+    searchPlaceholder: "Nemo kayayyaki...",
+    clearSearch: "Soke",
   },
 };
 
 export default function Home() {
   const [language, setLanguage] = useState<Language>("en");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const isOnline = useOnlineStatus();
 
-  // Load language from localStorage on mount
   useEffect(() => {
     const savedLang = localStorage.getItem("shabrat-lang") as Language | null;
     if (savedLang && (savedLang === "en" || savedLang === "ha")) {
@@ -70,7 +74,6 @@ export default function Home() {
     }
   }, []);
 
-  // Offline warning
   useEffect(() => {
     if (!isOnline && typeof window !== "undefined") {
       toast.warn("You are offline. Some features may be limited.", {
@@ -96,10 +99,20 @@ export default function Home() {
     return ["All", ...Array.from(cats)];
   }, []);
 
+  // Filter by category and search term (case‑insensitive)
   const filteredProducts = useMemo(() => {
-    if (selectedCategory === "All") return products;
-    return products.filter((p) => p.category === selectedCategory);
-  }, [selectedCategory]);
+    let filtered = products;
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+    if (searchTerm.trim() !== "") {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter((p) => p.name.toLowerCase().includes(term));
+    }
+    return filtered;
+  }, [selectedCategory, searchTerm]);
+
+  const handleClearSearch = () => setSearchTerm("");
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50/20 to-white">
@@ -127,7 +140,6 @@ export default function Home() {
               <FaLanguage />
               <span className="font-medium">{language === "en" ? "Hausa" : "English"}</span>
             </button>
-
             <button
               onClick={() => setIsBulkModalOpen(true)}
               className="flex items-center gap-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-1.5 rounded-full transition"
@@ -135,7 +147,6 @@ export default function Home() {
               <FaBox />
               <span className="font-medium">{t.bulkOrder}</span>
             </button>
-
             <a href="tel:+2349015751371" className="flex items-center gap-1 text-gray-700 hover:text-emerald-600">
               <FaPhoneAlt className="text-emerald-600" size={12} />
               <span className="hidden sm:inline">{t.callUs}</span>
@@ -177,6 +188,38 @@ export default function Home() {
         <span className="inline-flex items-center gap-2">{t.trustBar}</span>
       </div>
 
+      {/* Search Bar */}
+      <div className="bg-white border-b border-gray-200 py-4 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative max-w-md mx-auto md:mx-0">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaSearch className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder={t.searchPlaceholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 bg-white text-gray-900"
+            />
+            {searchTerm && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes />
+              </button>
+            )}
+          </div>
+          {searchTerm && (
+            <div className="text-sm text-gray-500 mt-2 text-center md:text-left">
+              Found {filteredProducts.length} product{filteredProducts.length !== 1 && "s"} for "{searchTerm}"
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Category Filter */}
       <div className="sticky top-[57px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200 py-3 px-4">
         <div className="max-w-7xl mx-auto overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 min-w-max">
