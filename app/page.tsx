@@ -1,16 +1,16 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaTruck, FaBox, FaCheckCircle, FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, FaLanguage } from "react-icons/fa";
 import ProductCard from "@/components/ProductCard";
 import BackToTop from "@/components/BackToTop";
 import BulkOrderModal from "@/components/BulkOrderModal";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { products } from "@/lib/products";
 
 type Language = "en" | "ha";
 
-// Translation dictionary
 const translations = {
   en: {
     brandSub: "Bulk food supplies | Kaduna",
@@ -60,6 +60,7 @@ export default function Home() {
   const [language, setLanguage] = useState<Language>("en");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const isOnline = useOnlineStatus();
 
   // Load language from localStorage on mount
   useEffect(() => {
@@ -68,6 +69,19 @@ export default function Home() {
       setLanguage(savedLang);
     }
   }, []);
+
+  // Offline warning
+  useEffect(() => {
+    if (!isOnline && typeof window !== "undefined") {
+      toast.warn("You are offline. Some features may be limited.", {
+        position: "bottom-center",
+        autoClose: false,
+        toastId: "offline-warning",
+      });
+    } else {
+      toast.dismiss("offline-warning");
+    }
+  }, [isOnline]);
 
   const toggleLanguage = () => {
     const newLang = language === "en" ? "ha" : "en";
@@ -98,7 +112,6 @@ export default function Home() {
         language={language}
       />
 
-      {/* Header */}
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -106,7 +119,6 @@ export default function Home() {
             <p className="text-xs text-gray-500 hidden sm:block">{t.brandSub}</p>
           </div>
           <div className="flex items-center gap-4 text-sm">
-            {/* Language Toggle Button */}
             <button
               onClick={toggleLanguage}
               className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-full transition"
@@ -116,7 +128,6 @@ export default function Home() {
               <span className="font-medium">{language === "en" ? "Hausa" : "English"}</span>
             </button>
 
-            {/* Bulk Order Button */}
             <button
               onClick={() => setIsBulkModalOpen(true)}
               className="flex items-center gap-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-1.5 rounded-full transition"
@@ -137,7 +148,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-r from-emerald-900 to-emerald-800 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
         <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-20 text-center">
@@ -163,12 +173,10 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/10 to-transparent"></div>
       </section>
 
-      {/* Trust Bar */}
       <div className="bg-amber-50 border-b border-amber-100 py-2 text-center text-sm text-gray-700">
         <span className="inline-flex items-center gap-2">{t.trustBar}</span>
       </div>
 
-      {/* Category Filter */}
       <div className="sticky top-[57px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200 py-3 px-4">
         <div className="max-w-7xl mx-auto overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 min-w-max">
@@ -189,7 +197,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
@@ -203,7 +210,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-white pt-10 pb-6">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
