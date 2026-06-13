@@ -3,6 +3,7 @@ import { useState } from "react";
 import { FaTimes, FaWhatsapp } from "react-icons/fa";
 import { Product } from "@/lib/products";
 import { trackLead } from "@/lib/fb-pixel";
+import { trackBulkOrder } from '@/lib/gtag';
 
 interface Props {
   isOpen: boolean;

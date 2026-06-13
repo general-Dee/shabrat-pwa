@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa";
 import { Product, getProductImage } from "@/lib/products";
 import { trackLead } from "@/lib/fb-pixel";
+import { trackWhatsAppClick } from "@/lib/gtag";
 
 const WHATSAPP_NUMBER = "2348165336618";
 
@@ -38,6 +39,7 @@ export default function ProductCard({ product, language }: Props) {
     });
     const totalPrice = product.price * quantity;
     trackLead(product.name, quantity, totalPrice);
+  trackWhatsAppClick(product.name, quantity, totalPrice);
     window.open(generateWhatsAppLink(), "_blank");
   };
 

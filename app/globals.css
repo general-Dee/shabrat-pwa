@@ -14,7 +14,12 @@
 
   body {
     background-image: radial-gradient(circle at 10% 20%, rgba(5, 150, 105, 0.02) 0%, rgba(5, 150, 105, 0.01) 90%);
+    font-family: 'Inter', 'Segoe UI', 'Arial', 'Noto Sans', system-ui, sans-serif;
   }
+}
+
+.currency {
+  font-family: 'Segoe UI', 'Arial', 'Noto Sans', sans-serif;
 }
 
 @layer components {
@@ -32,3 +37,5 @@
     scrollbar-width: none;
   }
 }
+
+/* Force Naira symbol to use a font that supports it */
