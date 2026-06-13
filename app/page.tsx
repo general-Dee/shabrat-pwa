@@ -7,7 +7,7 @@ import ProductCard from "@/components/ProductCard";
 import BackToTop from "@/components/BackToTop";
 import BulkOrderModal from "@/components/BulkOrderModal";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { products } from "@/lib/products";
+import { useProducts } from "@/hooks/useProducts";
 
 type Language = "en" | "ha";
 
@@ -31,7 +31,7 @@ const translations = {
     deliveryInfo: "Delivery across Kaduna Metro & surrounding areas.",
     copyright: "© 2025 Shabrat Investment. All rights reserved. Prices subject to change. Free delivery on orders above ₦100,000 within Kaduna Metro.",
     orderBtn: "Order",
-    loading: "Loading...",
+    loading: "Loading products...",
     searchPlaceholder: "Search products...",
     clearSearch: "Clear",
   },
@@ -54,7 +54,7 @@ const translations = {
     deliveryInfo: "Isarwa a cikin Kaduna Metro da kewaye.",
     copyright: "© 2025 Shabrat Investment. Kowane haƙƙi mallake ne. Farashin na iya canzawa. Isarwa kyauta ga oda sama da ₦100,000 a cikin Kaduna Metro.",
     orderBtn: "Oda",
-    loading: "Ana lodawa...",
+    loading: "Ana loda kayayyaki...",
     searchPlaceholder: "Nemo kayayyaki...",
     clearSearch: "Soke",
   },
@@ -66,6 +66,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const isOnline = useOnlineStatus();
+  const { products, loading, error } = useProducts();
 
   useEffect(() => {
     const savedLang = localStorage.getItem("shabrat-lang") as Language | null;
@@ -95,9 +96,10 @@ export default function Home() {
   const t = translations[language];
 
   const categories = useMemo(() => {
+    if (!products.length) return ["All"];
     const cats = new Set(products.map((p) => p.category));
     return ["All", ...Array.from(cats)];
-  }, []);
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
     let filtered = products;
@@ -109,9 +111,25 @@ export default function Home() {
       filtered = filtered.filter((p) => p.name.toLowerCase().includes(term));
     }
     return filtered;
-  }, [selectedCategory, searchTerm]);
+  }, [selectedCategory, searchTerm, products]);
 
   const handleClearSearch = () => setSearchTerm("");
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-emerald-50/20 to-white">
+        <div className="text-emerald-600 text-lg font-medium">{t.loading}</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-emerald-50/20 to-white">
+        <div className="text-red-600 text-lg font-medium">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50/20 to-white">
@@ -239,8 +257,13 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product._id} product={product} language={language} />
+          {filteredProducts.map((product, index) => (
+            <ProductCard
+              key={product._id}
+              product={product}
+              language={language}
+              priority={index < 6}
+            />
           ))}
         </div>
         {filteredProducts.length === 0 && (

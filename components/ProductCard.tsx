@@ -3,7 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa";
-import { Product, getProductImage } from "@/lib/products";
+import { Product } from "@/lib/types";
 import { trackLead } from "@/lib/fb-pixel";
 import { trackWhatsAppClick } from "@/lib/gtag";
 
@@ -12,11 +12,13 @@ const WHATSAPP_NUMBER = "2348165336618";
 interface Props {
   product: Product;
   language: "en" | "ha";
+  priority?: boolean;
 }
 
-export default function ProductCard({ product, language }: Props) {
+export default function ProductCard({ product, language, priority = false }: Props) {
   const [quantity, setQuantity] = useState(1);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [imgSrc, setImgSrc] = useState(product.imageUrl);
 
   const increment = () => setQuantity((q) => q + 1);
   const decrement = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
@@ -24,8 +26,8 @@ export default function ProductCard({ product, language }: Props) {
   const generateWhatsAppLink = () => {
     const totalPrice = product.price * quantity;
     const message = language === "en"
-      ? `Hello Shabrat Investment,%0A%0AI would like to order:%0A📦 *${product.name}*%0A🔢 Quantity: ${quantity} ${product.unit}%0A💰 Total: &#8358;${totalPrice.toLocaleString()}%0A%0APlease provide payment details and delivery options (Kaduna State).%0A%0AThank you!`
-      : `Assalamu alaikum Shabrat Investment,%0A%0AIna son yin oda:%0A📦 *${product.name}*%0A🔢 Adadi: ${quantity} ${product.unit}%0A💰 Jimlar kuɗi: &#8358;${totalPrice.toLocaleString()}%0A%0ADon Allah ku aiko min da hanyoyin biyan kuɗi da isar da kaya (Jihar Kaduna).%0A%0ANagode!`;
+      ? `Hello Shabrat Investment,%0A%0AI would like to order:%0A📦 *${product.name}*%0A🔢 Quantity: ${quantity} ${product.unit}%0A💰 Total: ₦${totalPrice.toLocaleString()}%0A%0APlease provide payment details and delivery options (Kaduna State).%0A%0AThank you!`
+      : `Assalamu alaikum Shabrat Investment,%0A%0AIna son yin oda:%0A📦 *${product.name}*%0A🔢 Adadi: ${quantity} ${product.unit}%0A💰 Jimlar kuɗi: ₦${totalPrice.toLocaleString()}%0A%0ADon Allah ku aiko min da hanyoyin biyan kuɗi da isar da kaya (Jihar Kaduna).%0A%0ANagode!`;
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
   };
 
@@ -52,13 +54,15 @@ export default function ProductCard({ product, language }: Props) {
           </div>
         )}
         <Image
-          src={getProductImage(product)}
+          src={imgSrc}
           alt={product.name}
           fill
+          priority={priority}
           className={`object-contain p-4 transition-transform duration-500 group-hover:scale-105 ${
             isImageLoaded ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => setIsImageLoaded(true)}
+          onError={() => setImgSrc('/placeholder.png')}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className="absolute top-2 left-2 z-10">
@@ -73,7 +77,7 @@ export default function ProductCard({ product, language }: Props) {
         </h3>
         <div className="mt-1 text-xs text-gray-500">Unit: {product.unit}</div>
         <div className="mt-2 flex items-baseline gap-1">
-          <span className="text-xl font-extrabold text-emerald-700">&#8358;{product.price.toLocaleString()}</span>
+          <span className="text-xl font-extrabold text-emerald-700">₦{product.price.toLocaleString()}</span>
           <span className="text-[11px] text-gray-400">/ {product.unit}</span>
         </div>
         <div className="mt-4 flex items-center justify-between gap-2">
