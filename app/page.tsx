@@ -147,11 +147,11 @@ export default function Home() {
               <FaBox />
               <span className="font-medium">{t.bulkOrder}</span>
             </button>
-            <a href="tel:+2349015751371" className="flex items-center gap-1 text-gray-700 hover:text-emerald-600">
+            <a href="tel:+2348165336618" className="flex items-center gap-1 text-gray-700 hover:text-emerald-600">
               <FaPhoneAlt className="text-emerald-600" size={12} />
               <span className="hidden sm:inline">{t.callUs}</span>
             </a>
-            <a href="https://wa.me/2349015751371" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-green-700 transition">
+            <a href="https://wa.me/2348165336618" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-green-700 transition">
               <FaWhatsapp />
               <span>WhatsApp</span>
             </a>
@@ -262,7 +262,7 @@ export default function Home() {
             </div>
             <div>
               <h4 className="font-semibold text-amber-300">{t.contact}</h4>
-              <p className="text-gray-400 text-sm mt-2 flex items-center justify-center md:justify-start gap-2"><FaPhoneAlt /> +234 (0) 901 575 1371</p>
+              <p className="text-gray-400 text-sm mt-2 flex items-center justify-center md:justify-start gap-2"><FaPhoneAlt /> +234 (0) 816 533 6618</p>
               <p className="text-gray-400 text-sm flex items-center justify-center md:justify-start gap-2"><FaWhatsapp /> {t.orderViaWhatsApp}</p>
             </div>
             <div>
