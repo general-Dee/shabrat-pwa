@@ -2,10 +2,10 @@
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import "@/lib/fb-pixel"; // ensures global Window interface includes fbq
 
 declare global {
   interface Window {
-    fbq: (...args: any[]) => void;
     dataLayer: any[];
     gtag: (...args: any[]) => void;
   }
