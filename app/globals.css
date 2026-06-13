@@ -14,12 +14,8 @@
 
   body {
     background-image: radial-gradient(circle at 10% 20%, rgba(5, 150, 105, 0.02) 0%, rgba(5, 150, 105, 0.01) 90%);
-    font-family: 'Inter', 'Segoe UI', 'Arial', 'Noto Sans', system-ui, sans-serif;
+    font-family: 'Segoe UI', 'Arial', 'Noto Sans', system-ui, sans-serif;
   }
-}
-
-.currency {
-  font-family: 'Segoe UI', 'Arial', 'Noto Sans', sans-serif;
 }
 
 @layer components {
@@ -38,4 +34,7 @@
   }
 }
 
-/* Force Naira symbol to use a font that supports it */
+/* Permanent Naira symbol fix */
+body, .currency, [class*="price"], [class*="total"] {
+  font-family: 'Segoe UI', 'Arial', 'Noto Sans', 'Roboto', sans-serif;
+}

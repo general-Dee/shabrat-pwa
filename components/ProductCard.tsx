@@ -24,22 +24,22 @@ export default function ProductCard({ product, language }: Props) {
   const generateWhatsAppLink = () => {
     const totalPrice = product.price * quantity;
     const message = language === "en"
-      ? `Hello Shabrat Investment,%0A%0AI would like to order:%0A?? *${product.name}*%0A?? Quantity: ${quantity} ${product.unit}%0A?? Total: ?${totalPrice.toLocaleString()}%0A%0APlease provide payment details and delivery options (Kaduna State).%0A%0AThank you!`
-      : `Assalamu alaikum Shabrat Investment,%0A%0AIna son yin oda:%0A?? *${product.name}*%0A?? Adadi: ${quantity} ${product.unit}%0A?? Jimlar ku?i: ?${totalPrice.toLocaleString()}%0A%0ADon Allah ku aiko min da hanyoyin biyan ku?i da isar da kaya (Jihar Kaduna).%0A%0ANagode!`;
+      ? `Hello Shabrat Investment,%0A%0AI would like to order:%0A📦 *${product.name}*%0A🔢 Quantity: ${quantity} ${product.unit}%0A💰 Total: &#8358;${totalPrice.toLocaleString()}%0A%0APlease provide payment details and delivery options (Kaduna State).%0A%0AThank you!`
+      : `Assalamu alaikum Shabrat Investment,%0A%0AIna son yin oda:%0A📦 *${product.name}*%0A🔢 Adadi: ${quantity} ${product.unit}%0A💰 Jimlar kuɗi: &#8358;${totalPrice.toLocaleString()}%0A%0ADon Allah ku aiko min da hanyoyin biyan kuɗi da isar da kaya (Jihar Kaduna).%0A%0ANagode!`;
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
   };
 
   const handleOrder = () => {
     toast.success(language === "en"
-      ? `Added ${quantity} ? ${product.name} to WhatsApp order`
-      : `An ?ara ${quantity} ? ${product.name} cikin oda ta WhatsApp`, {
+      ? `Added ${quantity} × ${product.name} to WhatsApp order`
+      : `An ƙara ${quantity} × ${product.name} cikin oda ta WhatsApp`, {
       position: "bottom-center",
       autoClose: 3000,
       style: { background: "#059669", color: "#fff" },
     });
     const totalPrice = product.price * quantity;
     trackLead(product.name, quantity, totalPrice);
-  trackWhatsAppClick(product.name, quantity, totalPrice);
+    trackWhatsAppClick(product.name, quantity, totalPrice);
     window.open(generateWhatsAppLink(), "_blank");
   };
 
@@ -73,12 +73,12 @@ export default function ProductCard({ product, language }: Props) {
         </h3>
         <div className="mt-1 text-xs text-gray-500">Unit: {product.unit}</div>
         <div className="mt-2 flex items-baseline gap-1">
-          <span className="text-xl font-extrabold text-emerald-700">?{product.price.toLocaleString()}</span>
+          <span className="text-xl font-extrabold text-emerald-700">&#8358;{product.price.toLocaleString()}</span>
           <span className="text-[11px] text-gray-400">/ {product.unit}</span>
         </div>
         <div className="mt-4 flex items-center justify-between gap-2">
           <div className="flex items-center border border-gray-200 rounded-md bg-white">
-            <button onClick={decrement} className="px-2 py-1 text-gray-600 hover:bg-gray-100 text-sm font-bold">?</button>
+            <button onClick={decrement} className="px-2 py-1 text-gray-600 hover:bg-gray-100 text-sm font-bold">−</button>
             <span className="px-3 py-1 text-center w-10 text-sm font-medium">{quantity}</span>
             <button onClick={increment} className="px-2 py-1 text-gray-600 hover:bg-gray-100 text-sm font-bold">+</button>
           </div>

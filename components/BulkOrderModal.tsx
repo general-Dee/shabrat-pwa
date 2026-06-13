@@ -3,7 +3,7 @@ import { useState } from "react";
 import { FaTimes, FaWhatsapp } from "react-icons/fa";
 import { Product } from "@/lib/products";
 import { trackLead } from "@/lib/fb-pixel";
-import { trackBulkOrder } from '@/lib/gtag';
+import { trackBulkOrder } from "@/lib/gtag";
 
 interface Props {
   isOpen: boolean;
@@ -20,7 +20,7 @@ const translations = {
     subtitle: "Select quantities for products you wish to order",
     product: "Product",
     unit: "Unit",
-    price: "Price (?)",
+    price: "Price (&#8358;)",
     qty: "Qty",
     total: "Total",
     send: "Send Bulk Order via WhatsApp",
@@ -31,17 +31,17 @@ const translations = {
   },
   ha: {
     title: "Oda mai yawa (Jumla)",
-    subtitle: "Za?i adadin kayayyakin da kuke son siya",
+    subtitle: "Zaɓi adadin kayayyakin da kuke son siya",
     product: "Kayan",
     unit: "Nau'in",
-    price: "Farashi (?)",
+    price: "Farashi (&#8358;)",
     qty: "Adadi",
     total: "Jimla",
     send: "Aika Oda mai yawa ta WhatsApp",
     cancel: "Soke",
     totalItems: "Jimlar kayayyaki",
-    totalPrice: "Jimlar ku?i",
-    empty: "Ba a za?i kayan ba. Da fatan za a ?ara a?alla kayan guda ?aya.",
+    totalPrice: "Jimlar kuɗi",
+    empty: "Ba a zaɓi kayan ba. Da fatan za a ƙara aƙalla kayan guda ɗaya.",
   },
 };
 
@@ -71,12 +71,12 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
 
     selectedProducts.forEach((p) => {
       const qty = quantities[p._id];
-      message += `?? ${p.name} ? ${qty} ${p.unit} = ?${(p.price * qty).toLocaleString()}%0A`;
+      message += `📦 ${p.name} × ${qty} ${p.unit} = &#8358;${(p.price * qty).toLocaleString()}%0A`;
     });
-    message += `%0A?? *Total items:* ${totalItems}%0A?? *Total price:* ?${totalPrice.toLocaleString()}%0A%0A`;
+    message += `%0A📊 *Total items:* ${totalItems}%0A💰 *Total price:* &#8358;${totalPrice.toLocaleString()}%0A%0A`;
     message += language === "en"
       ? "Please provide payment details and delivery options (Kaduna State). Thank you!"
-      : "Don Allah ku aiko min da hanyoyin biyan ku?i da isar da kaya (Jihar Kaduna). Nagode!";
+      : "Don Allah ku aiko min da hanyoyin biyan kuɗi da isar da kaya (Jihar Kaduna). Nagode!";
     return `https://wa.me/2348165336618?text=${message}`;
   };
 
@@ -86,6 +86,7 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
       return;
     }
     trackLead(`Bulk order (${selectedProducts.length} items)`, totalItems, totalPrice);
+    trackBulkOrder(totalItems, totalPrice);
     window.open(generateWhatsAppMessage(), "_blank");
     onClose();
   };
@@ -108,7 +109,13 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-gray-700">
-                <tr><th className="text-left p-3">{t.product}</th><th className="text-left p-3">{t.unit}</th><th className="text-right p-3">{t.price}</th><th className="text-center p-3">{t.qty}</th><th className="text-right p-3">{t.total}</th></tr>
+                <tr>
+                  <th className="text-left p-3">{t.product}</th>
+                  <th className="text-left p-3">{t.unit}</th>
+                  <th className="text-right p-3">{t.price}</th>
+                  <th className="text-center p-3">{t.qty}</th>
+                  <th className="text-right p-3">{t.total}</th>
+                </tr>
               </thead>
               <tbody>
                 {products.map((product) => {
@@ -118,11 +125,17 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
                     <tr key={product._id} className="border-b hover:bg-gray-50">
                       <td className="p-3 font-medium">{product.name}</td>
                       <td className="p-3 text-gray-500">{product.unit}</td>
-                      <td className="p-3 text-right">?{product.price.toLocaleString()}</td>
+                      <td className="p-3 text-right">&#8358;{product.price.toLocaleString()}</td>
                       <td className="p-3 text-center">
-                        <input type="number" min="0" value={qty} onChange={(e) => updateQuantity(product._id, parseInt(e.target.value) || 0)} className="w-20 px-2 py-1 border border-gray-300 rounded text-center" />
+                        <input
+                          type="number"
+                          min="0"
+                          value={qty}
+                          onChange={(e) => updateQuantity(product._id, parseInt(e.target.value) || 0)}
+                          className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
+                        />
                       </td>
-                      <td className="p-3 text-right font-medium">?{total.toLocaleString()}</td>
+                      <td className="p-3 text-right font-medium">&#8358;{total.toLocaleString()}</td>
                     </tr>
                   );
                 })}
@@ -133,11 +146,16 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
         <div className="border-t p-5 bg-gray-50">
           <div className="flex justify-between items-center mb-4">
             <span className="text-gray-700">{t.totalItems}: <strong>{totalItems}</strong></span>
-            <span className="text-gray-700">{t.totalPrice}: <strong className="text-emerald-700 text-lg">?{totalPrice.toLocaleString()}</strong></span>
+            <span className="text-gray-700">{t.totalPrice}: <strong className="text-emerald-700 text-lg">&#8358;{totalPrice.toLocaleString()}</strong></span>
           </div>
           <div className="flex gap-3 justify-end">
             <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">{t.cancel}</button>
-            <button onClick={handleSend} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"><FaWhatsapp /> {t.send}</button>
+            <button
+              onClick={handleSend}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+            >
+              <FaWhatsapp /> {t.send}
+            </button>
           </div>
         </div>
       </div>

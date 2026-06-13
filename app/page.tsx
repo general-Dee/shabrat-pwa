@@ -19,7 +19,7 @@ const translations = {
     heroTitle: "Trusted Supplier of",
     heroTitleSpan: "Premium Consumables",
     heroDesc: "Wholesale & retail – rice, flour, oil, noodles & more. Reliable delivery across Nigeria.",
-    freeDelivery: "Free delivery ≥ ₦100k",
+    freeDelivery: "Free delivery ≥ &#8358;100k",
     bulkDiscounts: "Bulk discounts",
     nitda: "NITDA Digital Trustmark",
     trustBar: "100% secure ordering | Instant confirmation | 5+ years serving Kaduna",
@@ -29,7 +29,7 @@ const translations = {
     orderViaWhatsApp: "Order via WhatsApp",
     location: "Location",
     deliveryInfo: "Delivery across Kaduna Metro & surrounding areas.",
-    copyright: "© 2025 Shabrat Investment. All rights reserved. Prices subject to change. Free delivery on orders above ₦100,000 within Kaduna Metro.",
+    copyright: "© 2025 Shabrat Investment. All rights reserved. Prices subject to change. Free delivery on orders above &#8358;100,000 within Kaduna Metro.",
     orderBtn: "Order",
     loading: "Loading...",
     searchPlaceholder: "Search products...",
@@ -42,7 +42,7 @@ const translations = {
     heroTitle: "Aminci Mai Samar da",
     heroTitleSpan: "Kayan Abinci Na Musamman",
     heroDesc: "Jumla da dillali – shinkafa, gari, mai, noodles da sauransu. Isarwa mai aminci a duk faɗin Najeriya.",
-    freeDelivery: "Isarwa kyauta sama da ₦100k",
+    freeDelivery: "Isarwa kyauta sama da &#8358;100k",
     bulkDiscounts: "Rangwamen jumla",
     nitda: "NITDA Amincewa ta Dijital",
     trustBar: "100% amintaccen oda | Tabbatarwa take | Shekaru 5+ muna hidimar Kaduna",
@@ -52,7 +52,7 @@ const translations = {
     orderViaWhatsApp: "Yi oda ta WhatsApp",
     location: "Wuri",
     deliveryInfo: "Isarwa a cikin Kaduna Metro da kewaye.",
-    copyright: "© 2025 Shabrat Investment. Kowane haƙƙi mallake ne. Farashin na iya canzawa. Isarwa kyauta ga oda sama da ₦100,000 a cikin Kaduna Metro.",
+    copyright: "© 2025 Shabrat Investment. Kowane haƙƙi mallake ne. Farashin na iya canzawa. Isarwa kyauta ga oda sama da &#8358;100,000 a cikin Kaduna Metro.",
     orderBtn: "Oda",
     loading: "Ana lodawa...",
     searchPlaceholder: "Nemo kayayyaki...",
@@ -99,7 +99,6 @@ export default function Home() {
     return ["All", ...Array.from(cats)];
   }, []);
 
-  // Filter by category and search term (case‑insensitive)
   const filteredProducts = useMemo(() => {
     let filtered = products;
     if (selectedCategory !== "All") {
@@ -188,7 +187,6 @@ export default function Home() {
         <span className="inline-flex items-center gap-2">{t.trustBar}</span>
       </div>
 
-      {/* Search Bar */}
       <div className="bg-white border-b border-gray-200 py-4 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="relative max-w-md mx-auto md:mx-0">
@@ -219,7 +217,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Category Filter */}
       <div className="sticky top-[57px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200 py-3 px-4">
         <div className="max-w-7xl mx-auto overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 min-w-max">
