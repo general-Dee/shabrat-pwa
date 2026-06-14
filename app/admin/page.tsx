@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import AdminGuard from "@/components/AdminGuard";
+import AdminCharts from "@/components/AdminCharts";
 import { FaEdit, FaTrash, FaPlus, FaSave, FaTimes, FaUpload } from "react-icons/fa";
 
 interface Product {
@@ -94,6 +95,29 @@ export default function AdminPage() {
     }
   };
 
+  const exportToCSV = () => {
+    if (orders.length === 0) return;
+    const headers = ["ID", "Product", "Quantity", "Total (₦)", "Type", "Phone", "Status", "Date"];
+    const rows = orders.map(o => [
+      o.id,
+      o.product_name || "Bulk",
+      o.quantity,
+      o.total_price,
+      o.type,
+      o.customer_phone || "",
+      o.status,
+      new Date(o.created_at).toLocaleString(),
+    ]);
+    const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `orders_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) return <div className="p-8">Loading...</div>;
 
   return (
@@ -109,6 +133,9 @@ export default function AdminPage() {
               Sign Out
             </button>
           </div>
+
+          {/* Charts Section */}
+          <AdminCharts />
 
           {/* Products Section */}
           <div className="bg-white rounded-lg shadow p-6 mb-8">
@@ -217,7 +244,15 @@ export default function AdminPage() {
 
           {/* Orders Section */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4">WhatsApp Orders</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold">WhatsApp Orders</h2>
+              <button
+                onClick={exportToCSV}
+                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+              >
+                Export to CSV
+              </button>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100">
