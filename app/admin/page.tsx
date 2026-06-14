@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import AdminGuard from "@/components/AdminGuard";
-import { FaEdit, FaTrash, FaPlus, FaSave, FaTimes } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaSave, FaTimes, FaUpload } from "react-icons/fa";
 
 interface Product {
   id: number;
@@ -11,6 +11,7 @@ interface Product {
   price: number;
   unit: string;
   image_url: string;
+  description?: string;
 }
 
 export default function AdminPage() {
@@ -19,12 +20,14 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "",
     price: 0,
     unit: "",
     image_url: "",
+    description: "",
   });
 
   useEffect(() => {
@@ -41,6 +44,20 @@ export default function AdminPage() {
   async function fetchOrders() {
     const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
     if (data) setOrders(data);
+  }
+
+  async function uploadImage(file: File): Promise<string> {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/cloudinary/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    setUploading(false);
+    if (data.url) return data.url;
+    throw new Error("Upload failed");
   }
 
   async function handleDelete(id: number) {
@@ -60,9 +77,22 @@ export default function AdminPage() {
   async function handleAdd() {
     await supabase.from("products").insert([newProduct]);
     setShowAddForm(false);
-    setNewProduct({ name: "", category: "", price: 0, unit: "", image_url: "" });
+    setNewProduct({ name: "", category: "", price: 0, unit: "", image_url: "", description: "" });
     fetchProducts();
   }
+
+  const handleImageUpload = async (file: File, isEdit: boolean) => {
+    try {
+      const url = await uploadImage(file);
+      if (isEdit && editingProduct) {
+        setEditingProduct({ ...editingProduct, image_url: url });
+      } else {
+        setNewProduct({ ...newProduct, image_url: url });
+      }
+    } catch (err) {
+      alert("Upload failed");
+    }
+  };
 
   if (loading) return <div className="p-8">Loading...</div>;
 
@@ -101,7 +131,17 @@ export default function AdminPage() {
                   <input type="text" placeholder="Category" value={newProduct.category} onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} className="border p-2 rounded" />
                   <input type="number" placeholder="Price" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) })} className="border p-2 rounded" />
                   <input type="text" placeholder="Unit" value={newProduct.unit} onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })} className="border p-2 rounded" />
-                  <input type="text" placeholder="Image URL" value={newProduct.image_url} onChange={(e) => setNewProduct({ ...newProduct, image_url: e.target.value })} className="border p-2 rounded col-span-2" />
+                  <textarea placeholder="Description" value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} className="border p-2 rounded col-span-2" rows={2} />
+                  <div className="col-span-2">
+                    <div className="flex gap-2 items-center">
+                      <input type="text" placeholder="Image URL" value={newProduct.image_url} onChange={(e) => setNewProduct({ ...newProduct, image_url: e.target.value })} className="border p-2 rounded flex-1" />
+                      <label className="bg-blue-600 text-white px-3 py-2 rounded cursor-pointer hover:bg-blue-700 flex items-center gap-1">
+                        <FaUpload /> Upload
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], false)} />
+                      </label>
+                      {uploading && <span className="text-sm text-gray-500">Uploading...</span>}
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-3 flex gap-2">
                   <button onClick={handleAdd} className="bg-emerald-600 text-white px-3 py-1 rounded flex items-center gap-1"><FaSave /> Save</button>
@@ -120,6 +160,7 @@ export default function AdminPage() {
                     <th className="p-2 text-left">Category</th>
                     <th className="p-2 text-right">Price</th>
                     <th className="p-2 text-left">Unit</th>
+                    <th className="p-2 text-left">Image</th>
                     <th className="p-2 text-center">Actions</th>
                   </tr>
                 </thead>
@@ -133,6 +174,15 @@ export default function AdminPage() {
                           <td className="p-2"><input value={editingProduct.category} onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })} className="border p-1 rounded w-full" /></td>
                           <td className="p-2"><input type="number" value={editingProduct.price} onChange={(e) => setEditingProduct({ ...editingProduct, price: parseInt(e.target.value) })} className="border p-1 rounded w-24" /></td>
                           <td className="p-2"><input value={editingProduct.unit} onChange={(e) => setEditingProduct({ ...editingProduct, unit: e.target.value })} className="border p-1 rounded w-full" /></td>
+                          <td className="p-2">
+                            <div className="flex gap-1 items-center">
+                              <input value={editingProduct.image_url} onChange={(e) => setEditingProduct({ ...editingProduct, image_url: e.target.value })} className="border p-1 rounded w-32 text-xs" />
+                              <label className="bg-blue-600 text-white p-1 rounded cursor-pointer text-xs">
+                                <FaUpload size={12} />
+                                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], true)} />
+                              </label>
+                            </div>
+                          </td>
                           <td className="p-2 text-center">
                             <button onClick={handleUpdate} className="text-green-600 mr-2"><FaSave /></button>
                             <button onClick={() => setEditingProduct(null)} className="text-gray-600"><FaTimes /></button>
@@ -145,6 +195,13 @@ export default function AdminPage() {
                           <td className="p-2">{p.category}</td>
                           <td className="p-2 text-right">₦{p.price.toLocaleString()}</td>
                           <td className="p-2">{p.unit}</td>
+                          <td className="p-2">
+                            {p.image_url ? (
+                              <img src={p.image_url} alt={p.name} className="w-8 h-8 object-cover rounded" />
+                            ) : (
+                              <span className="text-gray-400 text-xs">No image</span>
+                            )}
+                          </td>
                           <td className="p-2 text-center">
                             <button onClick={() => setEditingProduct(p)} className="text-blue-600 mr-2"><FaEdit /></button>
                             <button onClick={() => handleDelete(p.id)} className="text-red-600"><FaTrash /></button>
