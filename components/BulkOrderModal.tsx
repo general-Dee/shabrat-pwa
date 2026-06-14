@@ -5,6 +5,7 @@ import { Product } from "@/lib/products";
 import { trackLead } from "@/lib/fb-pixel";
 import { trackBulkOrder } from "@/lib/gtag";
 import { supabase } from "@/lib/supabaseClient";
+import { getUtmParams } from "@/lib/utm";
 
 interface Props {
   isOpen: boolean;
@@ -15,13 +16,25 @@ interface Props {
 
 type Quantities = Record<string, number>;
 
-async function trackOrder(productName: string, quantity: number, totalPrice: number, type: 'single' | 'bulk', phone?: string) {
+async function trackOrder(
+  productName: string,
+  quantity: number,
+  totalPrice: number,
+  type: 'single' | 'bulk',
+  phone?: string,
+  utm?: any
+) {
   const { error } = await supabase.from('orders').insert({
     product_name: productName,
     quantity: quantity,
     total_price: totalPrice,
     type: type,
     customer_phone: phone || null,
+    utm_source: utm?.utm_source,
+    utm_medium: utm?.utm_medium,
+    utm_campaign: utm?.utm_campaign,
+    utm_content: utm?.utm_content,
+    utm_term: utm?.utm_term,
   });
   if (error) console.error('Failed to track order:', error);
 }
@@ -97,9 +110,10 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
       alert(t.empty);
       return;
     }
+    const utm = getUtmParams();
     trackLead(`Bulk order (${selectedProducts.length} items)`, totalItems, totalPrice);
     trackBulkOrder(totalItems, totalPrice);
-    trackOrder(`Bulk (${selectedProducts.length} items)`, totalItems, totalPrice, 'bulk');
+    trackOrder(`Bulk (${selectedProducts.length} items)`, totalItems, totalPrice, 'bulk', undefined, utm);
     window.open(generateWhatsAppMessage(), "_blank");
     onClose();
   };

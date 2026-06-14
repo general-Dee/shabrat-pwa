@@ -97,7 +97,7 @@ export default function AdminPage() {
 
   const exportToCSV = () => {
     if (orders.length === 0) return;
-    const headers = ["ID", "Product", "Quantity", "Total (₦)", "Type", "Phone", "Status", "Date"];
+    const headers = ["ID", "Product", "Quantity", "Total (₦)", "Type", "Phone", "Status", "Date", "Source", "Medium", "Campaign", "Content", "Term"];
     const rows = orders.map(o => [
       o.id,
       o.product_name || "Bulk",
@@ -107,6 +107,11 @@ export default function AdminPage() {
       o.customer_phone || "",
       o.status,
       new Date(o.created_at).toLocaleString(),
+      o.utm_source || "",
+      o.utm_medium || "",
+      o.utm_campaign || "",
+      o.utm_content || "",
+      o.utm_term || "",
     ]);
     const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -134,7 +139,6 @@ export default function AdminPage() {
             </button>
           </div>
 
-          {/* Charts Section */}
           <AdminCharts />
 
           {/* Products Section */}
@@ -149,7 +153,6 @@ export default function AdminPage() {
               </button>
             </div>
 
-            {/* Add Product Form */}
             {showAddForm && (
               <div className="mb-6 p-4 border rounded bg-gray-50">
                 <h3 className="font-bold mb-2">New Product</h3>
@@ -177,7 +180,6 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* Products Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100">
@@ -264,6 +266,9 @@ export default function AdminPage() {
                     <th className="p-2 text-left">Type</th>
                     <th className="p-2 text-left">Phone</th>
                     <th className="p-2 text-left">Status</th>
+                    <th className="p-2 text-left">Source</th>
+                    <th className="p-2 text-left">Medium</th>
+                    <th className="p-2 text-left">Campaign</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -276,9 +281,12 @@ export default function AdminPage() {
                       <td className="p-2">{o.type}</td>
                       <td className="p-2">{o.customer_phone || "-"}</td>
                       <td className="p-2">{o.status}</td>
+                      <td className="p-2">{o.utm_source || "-"}</td>
+                      <td className="p-2">{o.utm_medium || "-"}</td>
+                      <td className="p-2">{o.utm_campaign || "-"}</td>
                     </tr>
                   ))}
-                  {orders.length === 0 && <tr><td colSpan={7} className="p-4 text-center text-gray-500">No orders yet</td></tr>}
+                  {orders.length === 0 && <tr><td colSpan={10} className="p-4 text-center text-gray-500">No orders yet</td></tr>}
                 </tbody>
               </table>
             </div>

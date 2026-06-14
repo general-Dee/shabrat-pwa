@@ -6,16 +6,29 @@ import { Product } from "@/lib/types";
 import { trackLead } from "@/lib/fb-pixel";
 import { trackWhatsAppClick } from "@/lib/gtag";
 import { supabase } from "@/lib/supabaseClient";
+import { getUtmParams } from "@/lib/utm";
 
 const WHATSAPP_NUMBER = "2348165336618";
 
-async function trackOrder(productName: string, quantity: number, totalPrice: number, type: 'single' | 'bulk', phone?: string) {
+async function trackOrder(
+  productName: string,
+  quantity: number,
+  totalPrice: number,
+  type: 'single' | 'bulk',
+  phone?: string,
+  utm?: any
+) {
   const { error } = await supabase.from('orders').insert({
     product_name: productName,
     quantity: quantity,
     total_price: totalPrice,
     type: type,
     customer_phone: phone || null,
+    utm_source: utm?.utm_source,
+    utm_medium: utm?.utm_medium,
+    utm_campaign: utm?.utm_campaign,
+    utm_content: utm?.utm_content,
+    utm_term: utm?.utm_term,
   });
   if (error) console.error('Failed to track order:', error);
 }
@@ -44,7 +57,6 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
   const [quantity, setQuantity] = useState(1);
   const t = translations[language];
 
-  // Track recently viewed
   useEffect(() => {
     if (product) {
       const stored = localStorage.getItem("recently_viewed");
@@ -69,9 +81,10 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
   };
 
   const handleOrder = () => {
+    const utm = getUtmParams();
     trackLead(product.name, quantity, totalPrice);
     trackWhatsAppClick(product.name, quantity, totalPrice);
-    trackOrder(product.name, quantity, totalPrice, 'single');
+    trackOrder(product.name, quantity, totalPrice, 'single', undefined, utm);
     window.open(generateWhatsAppLink(), "_blank");
     onClose();
   };
