@@ -2,7 +2,8 @@
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import "@/lib/fb-pixel"; // ensures global Window interface includes fbq
+import "@/lib/fb-pixel";
+import TrafficTracker from "@/components/TrafficTracker";
 
 declare global {
   interface Window {
@@ -80,7 +81,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <TrafficTracker />
+        {children}
+      </body>
     </html>
   );
 }
