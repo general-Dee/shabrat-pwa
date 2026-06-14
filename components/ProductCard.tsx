@@ -58,6 +58,10 @@ export default function ProductCard({ product, language, priority = false, onOpe
   };
 
   const handleOrder = () => {
+    if (product.stock === 0) {
+      toast.error("Out of stock", { position: "bottom-center" });
+      return;
+    }
     toast.success(language === "en"
       ? `Added ${quantity} × ${product.name} to WhatsApp order`
       : `An ƙara ${quantity} × ${product.name} cikin oda ta WhatsApp`, {
@@ -104,6 +108,17 @@ export default function ProductCard({ product, language, priority = false, onOpe
           {product.name}
         </h3>
         <div className="mt-1 text-xs text-gray-500">Unit: {product.unit}</div>
+        <div className="mt-1">
+          {product.stock === 0 && (
+            <span className="text-xs text-red-600 font-semibold">Out of Stock</span>
+          )}
+          {product.stock > 0 && product.stock < 10 && (
+            <span className="text-xs text-amber-600 font-semibold">Low Stock ({product.stock} left)</span>
+          )}
+          {product.stock >= 10 && (
+            <span className="text-xs text-green-600 font-semibold">In Stock</span>
+          )}
+        </div>
         <div className="mt-2 flex items-baseline gap-1">
           <span className="text-xl font-extrabold text-emerald-700">₦{product.price.toLocaleString()}</span>
           <span className="text-[11px] text-gray-400">/ {product.unit}</span>
@@ -116,7 +131,12 @@ export default function ProductCard({ product, language, priority = false, onOpe
           </div>
           <button
             onClick={handleOrder}
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-1.5 px-3 rounded-md transition flex items-center justify-center gap-1"
+            disabled={product.stock === 0}
+            className={`flex-1 text-white text-sm font-semibold py-1.5 px-3 rounded-md transition flex items-center justify-center gap-1 ${
+              product.stock === 0
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700"
+            }`}
           >
             <FaWhatsapp size={14} />
             <span>{language === "en" ? "Order" : "Oda"}</span>

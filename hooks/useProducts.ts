@@ -31,6 +31,7 @@ export function useProducts() {
             description: p.description || '',
             imageUrl: imageUrl,
             imagePublicId: p.image_public_id || '',
+            stock: p.stock ?? 0,
           }
         })
         setProducts(mapped)

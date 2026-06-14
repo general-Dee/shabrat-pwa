@@ -7,4 +7,5 @@
   description?: string;
   imageUrl: string;
   imagePublicId: string;
+  stock: number;
 };

@@ -45,11 +45,13 @@ const translations = {
     order: "Order on WhatsApp",
     quantity: "Quantity",
     close: "Close",
+    outOfStock: "Out of Stock",
   },
   ha: {
     order: "Yi oda ta WhatsApp",
     quantity: "Adadi",
     close: "Rufe",
+    outOfStock: "Babun kaya",
   },
 };
 
@@ -63,12 +65,16 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
       let ids = stored ? JSON.parse(stored) : [];
       ids = [product._id, ...ids.filter((id: string) => id !== product._id)].slice(0, 5);
       localStorage.setItem("recently_viewed", JSON.stringify(ids));
+      // Reset quantity when product changes
+      setQuantity(1);
     }
   }, [product]);
 
   if (!isOpen || !product) return null;
 
-  const increment = () => setQuantity((q) => q + 1);
+  const increment = () => {
+    if (quantity < product.stock) setQuantity((q) => q + 1);
+  };
   const decrement = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
   const totalPrice = product.price * quantity;
@@ -81,6 +87,7 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
   };
 
   const handleOrder = () => {
+    if (product.stock === 0) return;
     const utm = getUtmParams();
     trackLead(product.name, quantity, totalPrice);
     trackWhatsAppClick(product.name, quantity, totalPrice);
@@ -108,6 +115,8 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
     }
   };
 
+  const isOutOfStock = product.stock === 0;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto m-4" onClick={(e) => e.stopPropagation()}>
@@ -126,6 +135,15 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-800">{product.name}</h2>
             <p className="text-sm text-gray-500 mt-1">Category: {product.category.replace(/[^\w\s]/g, '')}</p>
+            <div className="mt-2">
+              {isOutOfStock ? (
+                <span className="text-sm text-red-600 font-semibold">{t.outOfStock}</span>
+              ) : product.stock < 10 ? (
+                <span className="text-sm text-amber-600 font-semibold">Low Stock ({product.stock} left)</span>
+              ) : (
+                <span className="text-sm text-green-600 font-semibold">In Stock</span>
+              )}
+            </div>
             {product.description && (
               <p className="text-gray-600 mt-3">{product.description}</p>
             )}
@@ -136,13 +154,18 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
 
             <div className="mt-6 flex items-center gap-4">
               <div className="flex items-center border border-gray-200 rounded-md bg-white">
-                <button onClick={decrement} className="px-3 py-1 text-gray-600 hover:bg-gray-100 text-lg font-bold">−</button>
+                <button onClick={decrement} disabled={isOutOfStock} className="px-3 py-1 text-gray-600 hover:bg-gray-100 text-lg font-bold disabled:opacity-50">−</button>
                 <span className="px-4 py-1 text-center w-12 text-base font-medium">{quantity}</span>
-                <button onClick={increment} className="px-3 py-1 text-gray-600 hover:bg-gray-100 text-lg font-bold">+</button>
+                <button onClick={increment} disabled={isOutOfStock || quantity >= product.stock} className="px-3 py-1 text-gray-600 hover:bg-gray-100 text-lg font-bold disabled:opacity-50">+</button>
               </div>
               <button
                 onClick={handleOrder}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"
+                disabled={isOutOfStock}
+                className={`flex-1 font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2 ${
+                  isOutOfStock
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-green-600 hover:bg-green-700 text-white"
+                }`}
               >
                 <FaWhatsapp /> {t.order}
               </button>
