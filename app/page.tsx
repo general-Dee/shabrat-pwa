@@ -7,6 +7,7 @@ import ProductCard from "@/components/ProductCard";
 import BackToTop from "@/components/BackToTop";
 import BulkOrderModal from "@/components/BulkOrderModal";
 import ProductModal from "@/components/ProductModal";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/lib/types";
@@ -36,6 +37,7 @@ const translations = {
     loading: "Loading products...",
     searchPlaceholder: "Search products...",
     clearSearch: "Clear",
+    loadMore: "Load More",
   },
   ha: {
     brandSub: "Kayan abinci a jumla | Kaduna",
@@ -59,6 +61,7 @@ const translations = {
     loading: "Ana loda kayayyaki...",
     searchPlaceholder: "Nemo kayayyaki...",
     clearSearch: "Soke",
+    loadMore: "Kara Kayayyaki",
   },
 };
 
@@ -68,6 +71,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [visibleCount, setVisibleCount] = useState(12);
   const isOnline = useOnlineStatus();
   const { products, loading, error } = useProducts();
 
@@ -116,6 +120,10 @@ export default function Home() {
     return filtered;
   }, [selectedCategory, searchTerm, products]);
 
+  const displayedProducts = filteredProducts.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredProducts.length;
+
+  const handleLoadMore = () => setVisibleCount(prev => prev + 12);
   const handleClearSearch = () => setSearchTerm("");
 
   if (loading) {
@@ -266,7 +274,7 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product, index) => (
+          {displayedProducts.map((product, index) => (
             <ProductCard
               key={product._id}
               product={product}
@@ -276,11 +284,29 @@ export default function Home() {
             />
           ))}
         </div>
-        {filteredProducts.length === 0 && (
+
+        {hasMore && (
+          <div className="text-center mt-8">
+            <button
+              onClick={handleLoadMore}
+              className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition"
+            >
+              {t.loadMore} ({filteredProducts.length - visibleCount} left)
+            </button>
+          </div>
+        )}
+
+        {displayedProducts.length === 0 && (
           <div className="text-center py-20">
             <p className="text-gray-500 text-lg">{t.noProducts}</p>
           </div>
         )}
+
+        <RecentlyViewed
+          products={products}
+          language={language}
+          onProductClick={(product) => setSelectedProduct(product)}
+        />
       </div>
 
       <footer className="bg-gray-900 text-white pt-10 pb-6">

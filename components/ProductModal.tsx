@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { FaTimes, FaWhatsapp } from "react-icons/fa";
+import { FaTimes, FaWhatsapp, FaShareAlt } from "react-icons/fa";
 import { Product } from "@/lib/types";
 import { trackLead } from "@/lib/fb-pixel";
 import { trackWhatsAppClick } from "@/lib/gtag";
@@ -44,6 +44,16 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
   const [quantity, setQuantity] = useState(1);
   const t = translations[language];
 
+  // Track recently viewed
+  useEffect(() => {
+    if (product) {
+      const stored = localStorage.getItem("recently_viewed");
+      let ids = stored ? JSON.parse(stored) : [];
+      ids = [product._id, ...ids.filter((id: string) => id !== product._id)].slice(0, 5);
+      localStorage.setItem("recently_viewed", JSON.stringify(ids));
+    }
+  }, [product]);
+
   if (!isOpen || !product) return null;
 
   const increment = () => setQuantity((q) => q + 1);
@@ -66,13 +76,37 @@ export default function ProductModal({ product, isOpen, onClose, language }: Pro
     onClose();
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    const shareData = {
+      title: product.name,
+      text: `Check out ${product.name} on Shabrat Investment – ₦${product.price.toLocaleString()}`,
+      url: url,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log("Share cancelled");
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert("Link copied to clipboard!");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto m-4" onClick={(e) => e.stopPropagation()}>
         <div className="relative">
-          <button onClick={onClose} className="absolute top-4 right-4 z-10 bg-white rounded-full p-1 shadow">
-            <FaTimes className="text-gray-600" />
-          </button>
+          <div className="absolute top-4 right-4 z-10 flex gap-2">
+            <button onClick={handleShare} className="bg-white rounded-full p-1 shadow">
+              <FaShareAlt className="text-gray-600" />
+            </button>
+            <button onClick={onClose} className="bg-white rounded-full p-1 shadow">
+              <FaTimes className="text-gray-600" />
+            </button>
+          </div>
           <div className="relative h-64 md:h-80 w-full bg-gray-100">
             <Image src={product.imageUrl} alt={product.name} fill className="object-contain p-4" />
           </div>
