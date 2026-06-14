@@ -1,0 +1,108 @@
+"use client";
+import { useState } from "react";
+import Image from "next/image";
+import { FaTimes, FaWhatsapp } from "react-icons/fa";
+import { Product } from "@/lib/types";
+import { trackLead } from "@/lib/fb-pixel";
+import { trackWhatsAppClick } from "@/lib/gtag";
+import { supabase } from "@/lib/supabaseClient";
+
+const WHATSAPP_NUMBER = "2348165336618";
+
+async function trackOrder(productName: string, quantity: number, totalPrice: number, type: 'single' | 'bulk', phone?: string) {
+  const { error } = await supabase.from('orders').insert({
+    product_name: productName,
+    quantity: quantity,
+    total_price: totalPrice,
+    type: type,
+    customer_phone: phone || null,
+  });
+  if (error) console.error('Failed to track order:', error);
+}
+
+interface Props {
+  product: Product | null;
+  isOpen: boolean;
+  onClose: () => void;
+  language: "en" | "ha";
+}
+
+const translations = {
+  en: {
+    order: "Order on WhatsApp",
+    quantity: "Quantity",
+    close: "Close",
+  },
+  ha: {
+    order: "Yi oda ta WhatsApp",
+    quantity: "Adadi",
+    close: "Rufe",
+  },
+};
+
+export default function ProductModal({ product, isOpen, onClose, language }: Props) {
+  const [quantity, setQuantity] = useState(1);
+  const t = translations[language];
+
+  if (!isOpen || !product) return null;
+
+  const increment = () => setQuantity((q) => q + 1);
+  const decrement = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
+
+  const totalPrice = product.price * quantity;
+
+  const generateWhatsAppLink = () => {
+    const message = language === "en"
+      ? `Hello Shabrat Investment,%0A%0AI would like to order from product detail:%0A📦 *${product.name}*%0A🔢 Quantity: ${quantity} ${product.unit}%0A💰 Total: ₦${totalPrice.toLocaleString()}%0A%0APlease provide payment details and delivery options (Kaduna State).%0A%0AThank you!`
+      : `Assalamu alaikum Shabrat Investment,%0A%0AIna son yin oda daga cikakken bayani:%0A📦 *${product.name}*%0A🔢 Adadi: ${quantity} ${product.unit}%0A💰 Jimlar kuɗi: ₦${totalPrice.toLocaleString()}%0A%0ADon Allah ku aiko min da hanyoyin biyan kuɗi da isar da kaya (Jihar Kaduna).%0A%0ANagode!`;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+  };
+
+  const handleOrder = () => {
+    trackLead(product.name, quantity, totalPrice);
+    trackWhatsAppClick(product.name, quantity, totalPrice);
+    trackOrder(product.name, quantity, totalPrice, 'single');
+    window.open(generateWhatsAppLink(), "_blank");
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto m-4" onClick={(e) => e.stopPropagation()}>
+        <div className="relative">
+          <button onClick={onClose} className="absolute top-4 right-4 z-10 bg-white rounded-full p-1 shadow">
+            <FaTimes className="text-gray-600" />
+          </button>
+          <div className="relative h-64 md:h-80 w-full bg-gray-100">
+            <Image src={product.imageUrl} alt={product.name} fill className="object-contain p-4" />
+          </div>
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-gray-800">{product.name}</h2>
+            <p className="text-sm text-gray-500 mt-1">Category: {product.category.replace(/[^\w\s]/g, '')}</p>
+            {product.description && (
+              <p className="text-gray-600 mt-3">{product.description}</p>
+            )}
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-emerald-700">₦{product.price.toLocaleString()}</span>
+              <span className="text-gray-500">/ {product.unit}</span>
+            </div>
+
+            <div className="mt-6 flex items-center gap-4">
+              <div className="flex items-center border border-gray-200 rounded-md bg-white">
+                <button onClick={decrement} className="px-3 py-1 text-gray-600 hover:bg-gray-100 text-lg font-bold">−</button>
+                <span className="px-4 py-1 text-center w-12 text-base font-medium">{quantity}</span>
+                <button onClick={increment} className="px-3 py-1 text-gray-600 hover:bg-gray-100 text-lg font-bold">+</button>
+              </div>
+              <button
+                onClick={handleOrder}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"
+              >
+                <FaWhatsapp /> {t.order}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

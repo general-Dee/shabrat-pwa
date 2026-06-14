@@ -6,8 +6,10 @@ import { FaTruck, FaBox, FaCheckCircle, FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, 
 import ProductCard from "@/components/ProductCard";
 import BackToTop from "@/components/BackToTop";
 import BulkOrderModal from "@/components/BulkOrderModal";
+import ProductModal from "@/components/ProductModal";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useProducts } from "@/hooks/useProducts";
+import { Product } from "@/lib/types";
 
 type Language = "en" | "ha";
 
@@ -65,6 +67,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const isOnline = useOnlineStatus();
   const { products, loading, error } = useProducts();
 
@@ -139,6 +142,12 @@ export default function Home() {
         isOpen={isBulkModalOpen}
         onClose={() => setIsBulkModalOpen(false)}
         products={products}
+        language={language}
+      />
+      <ProductModal
+        product={selectedProduct}
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
         language={language}
       />
 
@@ -263,6 +272,7 @@ export default function Home() {
               product={product}
               language={language}
               priority={index < 6}
+              onOpenModal={() => setSelectedProduct(product)}
             />
           ))}
         </div>

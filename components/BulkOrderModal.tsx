@@ -4,6 +4,7 @@ import { FaTimes, FaWhatsapp } from "react-icons/fa";
 import { Product } from "@/lib/products";
 import { trackLead } from "@/lib/fb-pixel";
 import { trackBulkOrder } from "@/lib/gtag";
+import { supabase } from "@/lib/supabaseClient";
 
 interface Props {
   isOpen: boolean;
@@ -14,13 +15,24 @@ interface Props {
 
 type Quantities = Record<string, number>;
 
+async function trackOrder(productName: string, quantity: number, totalPrice: number, type: 'single' | 'bulk', phone?: string) {
+  const { error } = await supabase.from('orders').insert({
+    product_name: productName,
+    quantity: quantity,
+    total_price: totalPrice,
+    type: type,
+    customer_phone: phone || null,
+  });
+  if (error) console.error('Failed to track order:', error);
+}
+
 const translations = {
   en: {
     title: "Bulk Order (Wholesale)",
     subtitle: "Select quantities for products you wish to order",
     product: "Product",
     unit: "Unit",
-    price: "Price (&#8358;)",
+    price: "Price (₦)",
     qty: "Qty",
     total: "Total",
     send: "Send Bulk Order via WhatsApp",
@@ -34,7 +46,7 @@ const translations = {
     subtitle: "Zaɓi adadin kayayyakin da kuke son siya",
     product: "Kayan",
     unit: "Nau'in",
-    price: "Farashi (&#8358;)",
+    price: "Farashi (₦)",
     qty: "Adadi",
     total: "Jimla",
     send: "Aika Oda mai yawa ta WhatsApp",
@@ -71,9 +83,9 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
 
     selectedProducts.forEach((p) => {
       const qty = quantities[p._id];
-      message += `📦 ${p.name} × ${qty} ${p.unit} = &#8358;${(p.price * qty).toLocaleString()}%0A`;
+      message += `📦 ${p.name} × ${qty} ${p.unit} = ₦${(p.price * qty).toLocaleString()}%0A`;
     });
-    message += `%0A📊 *Total items:* ${totalItems}%0A💰 *Total price:* &#8358;${totalPrice.toLocaleString()}%0A%0A`;
+    message += `%0A📊 *Total items:* ${totalItems}%0A💰 *Total price:* ₦${totalPrice.toLocaleString()}%0A%0A`;
     message += language === "en"
       ? "Please provide payment details and delivery options (Kaduna State). Thank you!"
       : "Don Allah ku aiko min da hanyoyin biyan kuɗi da isar da kaya (Jihar Kaduna). Nagode!";
@@ -87,6 +99,7 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
     }
     trackLead(`Bulk order (${selectedProducts.length} items)`, totalItems, totalPrice);
     trackBulkOrder(totalItems, totalPrice);
+    trackOrder(`Bulk (${selectedProducts.length} items)`, totalItems, totalPrice, 'bulk');
     window.open(generateWhatsAppMessage(), "_blank");
     onClose();
   };
@@ -125,7 +138,7 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
                     <tr key={product._id} className="border-b hover:bg-gray-50">
                       <td className="p-3 font-medium">{product.name}</td>
                       <td className="p-3 text-gray-500">{product.unit}</td>
-                      <td className="p-3 text-right">&#8358;{product.price.toLocaleString()}</td>
+                      <td className="p-3 text-right">₦{product.price.toLocaleString()}</td>
                       <td className="p-3 text-center">
                         <input
                           type="number"
@@ -135,7 +148,7 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
                           className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
                         />
                       </td>
-                      <td className="p-3 text-right font-medium">&#8358;{total.toLocaleString()}</td>
+                      <td className="p-3 text-right font-medium">₦{total.toLocaleString()}</td>
                     </tr>
                   );
                 })}
@@ -146,7 +159,7 @@ export default function BulkOrderModal({ isOpen, onClose, products, language }: 
         <div className="border-t p-5 bg-gray-50">
           <div className="flex justify-between items-center mb-4">
             <span className="text-gray-700">{t.totalItems}: <strong>{totalItems}</strong></span>
-            <span className="text-gray-700">{t.totalPrice}: <strong className="text-emerald-700 text-lg">&#8358;{totalPrice.toLocaleString()}</strong></span>
+            <span className="text-gray-700">{t.totalPrice}: <strong className="text-emerald-700 text-lg">₦{totalPrice.toLocaleString()}</strong></span>
           </div>
           <div className="flex gap-3 justify-end">
             <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">{t.cancel}</button>

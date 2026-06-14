@@ -19,7 +19,6 @@ export function useProducts() {
 
         const mapped: Product[] = data.map((p: any) => {
           let imageUrl = p.image_url || '/placeholder.png'
-          // Optimise Cloudinary URLs with auto format & quality
           if (imageUrl.includes('res.cloudinary.com')) {
             imageUrl = imageUrl.replace('/upload/', '/upload/f_auto,q_auto/')
           }
@@ -29,6 +28,7 @@ export function useProducts() {
             category: p.category,
             price: p.price,
             unit: p.unit,
+            description: p.description || '',
             imageUrl: imageUrl,
             imagePublicId: p.image_public_id || '',
           }

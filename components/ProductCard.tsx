@@ -6,6 +6,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import { Product } from "@/lib/types";
 import { trackLead } from "@/lib/fb-pixel";
 import { trackWhatsAppClick } from "@/lib/gtag";
+import { supabase } from "@/lib/supabaseClient";
 
 const WHATSAPP_NUMBER = "2348165336618";
 
@@ -13,9 +14,21 @@ interface Props {
   product: Product;
   language: "en" | "ha";
   priority?: boolean;
+  onOpenModal: () => void;
 }
 
-export default function ProductCard({ product, language, priority = false }: Props) {
+async function trackOrder(productName: string, quantity: number, totalPrice: number, type: 'single' | 'bulk', phone?: string) {
+  const { error } = await supabase.from('orders').insert({
+    product_name: productName,
+    quantity: quantity,
+    total_price: totalPrice,
+    type: type,
+    customer_phone: phone || null,
+  });
+  if (error) console.error('Failed to track order:', error);
+}
+
+export default function ProductCard({ product, language, priority = false, onOpenModal }: Props) {
   const [quantity, setQuantity] = useState(1);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [imgSrc, setImgSrc] = useState(product.imageUrl);
@@ -42,12 +55,13 @@ export default function ProductCard({ product, language, priority = false }: Pro
     const totalPrice = product.price * quantity;
     trackLead(product.name, quantity, totalPrice);
     trackWhatsAppClick(product.name, quantity, totalPrice);
+    trackOrder(product.name, quantity, totalPrice, 'single');
     window.open(generateWhatsAppLink(), "_blank");
   };
 
   return (
     <div className="group bg-white rounded-xl border border-gray-200 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg flex flex-col h-full overflow-hidden">
-      <div className="relative h-48 w-full bg-gray-50 overflow-hidden">
+      <div className="relative h-48 w-full bg-gray-50 overflow-hidden cursor-pointer" onClick={onOpenModal}>
         {!isImageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 animate-pulse">
             <span className="text-gray-400 text-xs">Loading...</span>
@@ -72,7 +86,7 @@ export default function ProductCard({ product, language, priority = false }: Pro
         </div>
       </div>
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-bold text-gray-800 text-base line-clamp-2 min-h-[2.5rem] group-hover:text-emerald-700 transition">
+        <h3 className="font-bold text-gray-800 text-base line-clamp-2 min-h-[2.5rem] group-hover:text-emerald-700 transition cursor-pointer" onClick={onOpenModal}>
           {product.name}
         </h3>
         <div className="mt-1 text-xs text-gray-500">Unit: {product.unit}</div>

@@ -4,6 +4,7 @@
   category: string;
   price: number;
   unit: string;
+  description?: string;
   imageUrl: string;
   imagePublicId: string;
 };
