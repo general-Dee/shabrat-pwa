@@ -329,6 +329,14 @@ export default function Home() {
           </div>
           <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-500 text-xs">
             {t.copyright}
+            {/* Subtle admin link – low opacity lock icon */}
+            <a
+              href="/admin"
+              className="block text-center text-gray-500 hover:text-emerald-600 text-xs mt-2 opacity-30 hover:opacity-100 transition"
+              aria-label="Admin"
+            >
+              🔒
+            </a>
           </div>
         </div>
       </footer>
