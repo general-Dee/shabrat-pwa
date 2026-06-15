@@ -1,6 +1,7 @@
 ﻿import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { Suspense } from "react";
 import "./globals.css";
 import "@/lib/fb-pixel";
 import TrafficTracker from "@/components/TrafficTracker";
@@ -82,7 +83,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={inter.className}>
-        <TrafficTracker />
+        <Suspense fallback={null}>
+          <TrafficTracker />
+        </Suspense>
         {children}
       </body>
     </html>
