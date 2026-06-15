@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import AdminGuard from "@/components/AdminGuard";
 import AdminCharts from "@/components/AdminCharts";
+import AdminReports from "@/components/AdminReports";
 import { FaEdit, FaTrash, FaPlus, FaSave, FaTimes, FaUpload } from "react-icons/fa";
 
 interface Product {
@@ -13,6 +14,7 @@ interface Product {
   unit: string;
   image_url: string;
   description?: string;
+  stock: number;
 }
 
 export default function AdminPage() {
@@ -22,6 +24,7 @@ export default function AdminPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "",
@@ -29,6 +32,7 @@ export default function AdminPage() {
     unit: "",
     image_url: "",
     description: "",
+    stock: 0,
   });
 
   useEffect(() => {
@@ -37,14 +41,16 @@ export default function AdminPage() {
   }, []);
 
   async function fetchProducts() {
-    const { data } = await supabase.from("products").select("*").order("name");
-    if (data) setProducts(data);
+    const { data, error } = await supabase.from("products").select("*").order("name");
+    if (error) console.error("Fetch products error:", error);
+    else setProducts(data || []);
     setLoading(false);
   }
 
   async function fetchOrders() {
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    if (data) setOrders(data);
+    const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    if (error) console.error("Fetch orders error:", error);
+    else setOrders(data || []);
   }
 
   async function uploadImage(file: File): Promise<string> {
@@ -62,24 +68,65 @@ export default function AdminPage() {
   }
 
   async function handleDelete(id: number) {
-    if (confirm("Delete this product?")) {
-      await supabase.from("products").delete().eq("id", id);
+    if (!confirm("Delete this product?")) return;
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    if (error) {
+      alert("Delete failed: " + error.message);
+    } else {
       fetchProducts();
     }
   }
 
   async function handleUpdate() {
     if (!editingProduct) return;
-    await supabase.from("products").update(editingProduct).eq("id", editingProduct.id);
-    setEditingProduct(null);
-    fetchProducts();
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("products")
+        .update({
+          name: editingProduct.name,
+          category: editingProduct.category,
+          price: editingProduct.price,
+          unit: editingProduct.unit,
+          stock: editingProduct.stock,
+          image_url: editingProduct.image_url,
+          description: editingProduct.description,
+        })
+        .eq("id", editingProduct.id);
+      if (error) {
+        alert("Update failed: " + error.message);
+        console.error(error);
+      } else {
+        setEditingProduct(null);
+        await fetchProducts(); // refresh list
+      }
+    } catch (err: any) {
+      alert("Unexpected error: " + err.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleAdd() {
-    await supabase.from("products").insert([newProduct]);
-    setShowAddForm(false);
-    setNewProduct({ name: "", category: "", price: 0, unit: "", image_url: "", description: "" });
-    fetchProducts();
+    if (!newProduct.name || !newProduct.category || newProduct.price <= 0) {
+      alert("Please fill name, category and price.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("products").insert([newProduct]);
+      if (error) {
+        alert("Add failed: " + error.message);
+      } else {
+        setShowAddForm(false);
+        setNewProduct({ name: "", category: "", price: 0, unit: "", image_url: "", description: "", stock: 0 });
+        await fetchProducts();
+      }
+    } catch (err: any) {
+      alert("Unexpected error: " + err.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   const handleImageUpload = async (file: File, isEdit: boolean) => {
@@ -91,7 +138,7 @@ export default function AdminPage() {
         setNewProduct({ ...newProduct, image_url: url });
       }
     } catch (err) {
-      alert("Upload failed");
+      alert("Image upload failed");
     }
   };
 
@@ -123,7 +170,7 @@ export default function AdminPage() {
     URL.revokeObjectURL(url);
   };
 
-  if (loading) return <div className="p-8">Loading...</div>;
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
 
   return (
     <AdminGuard>
@@ -139,6 +186,7 @@ export default function AdminPage() {
             </button>
           </div>
 
+          <AdminReports />
           <AdminCharts />
 
           {/* Products Section */}
@@ -159,8 +207,9 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input type="text" placeholder="Name" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} className="border p-2 rounded" />
                   <input type="text" placeholder="Category" value={newProduct.category} onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} className="border p-2 rounded" />
-                  <input type="number" placeholder="Price" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) })} className="border p-2 rounded" />
+                  <input type="number" placeholder="Price" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) || 0 })} className="border p-2 rounded" />
                   <input type="text" placeholder="Unit" value={newProduct.unit} onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })} className="border p-2 rounded" />
+                  <input type="number" placeholder="Stock" value={newProduct.stock} onChange={(e) => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) || 0 })} className="border p-2 rounded" />
                   <textarea placeholder="Description" value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} className="border p-2 rounded col-span-2" rows={2} />
                   <div className="col-span-2">
                     <div className="flex gap-2 items-center">
@@ -174,7 +223,9 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <button onClick={handleAdd} className="bg-emerald-600 text-white px-3 py-1 rounded flex items-center gap-1"><FaSave /> Save</button>
+                  <button onClick={handleAdd} disabled={saving} className="bg-emerald-600 text-white px-3 py-1 rounded flex items-center gap-1">
+                    <FaSave /> {saving ? "Saving..." : "Save"}
+                  </button>
                   <button onClick={() => setShowAddForm(false)} className="bg-gray-400 text-white px-3 py-1 rounded flex items-center gap-1"><FaTimes /> Cancel</button>
                 </div>
               </div>
@@ -189,6 +240,7 @@ export default function AdminPage() {
                     <th className="p-2 text-left">Category</th>
                     <th className="p-2 text-right">Price</th>
                     <th className="p-2 text-left">Unit</th>
+                    <th className="p-2 text-right">Stock</th>
                     <th className="p-2 text-left">Image</th>
                     <th className="p-2 text-center">Actions</th>
                   </tr>
@@ -201,8 +253,9 @@ export default function AdminPage() {
                           <td className="p-2">{p.id}</td>
                           <td className="p-2"><input value={editingProduct.name} onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })} className="border p-1 rounded w-full" /></td>
                           <td className="p-2"><input value={editingProduct.category} onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })} className="border p-1 rounded w-full" /></td>
-                          <td className="p-2"><input type="number" value={editingProduct.price} onChange={(e) => setEditingProduct({ ...editingProduct, price: parseInt(e.target.value) })} className="border p-1 rounded w-24" /></td>
+                          <td className="p-2"><input type="number" value={editingProduct.price} onChange={(e) => setEditingProduct({ ...editingProduct, price: parseInt(e.target.value) || 0 })} className="border p-1 rounded w-24" /></td>
                           <td className="p-2"><input value={editingProduct.unit} onChange={(e) => setEditingProduct({ ...editingProduct, unit: e.target.value })} className="border p-1 rounded w-full" /></td>
+                          <td className="p-2"><input type="number" value={editingProduct.stock} onChange={(e) => setEditingProduct({ ...editingProduct, stock: parseInt(e.target.value) || 0 })} className="border p-1 rounded w-20" /></td>
                           <td className="p-2">
                             <div className="flex gap-1 items-center">
                               <input value={editingProduct.image_url} onChange={(e) => setEditingProduct({ ...editingProduct, image_url: e.target.value })} className="border p-1 rounded w-32 text-xs" />
@@ -213,7 +266,7 @@ export default function AdminPage() {
                             </div>
                           </td>
                           <td className="p-2 text-center">
-                            <button onClick={handleUpdate} className="text-green-600 mr-2"><FaSave /></button>
+                            <button onClick={handleUpdate} disabled={saving} className="text-green-600 mr-2"><FaSave /></button>
                             <button onClick={() => setEditingProduct(null)} className="text-gray-600"><FaTimes /></button>
                           </td>
                         </>
@@ -224,6 +277,7 @@ export default function AdminPage() {
                           <td className="p-2">{p.category}</td>
                           <td className="p-2 text-right">₦{p.price.toLocaleString()}</td>
                           <td className="p-2">{p.unit}</td>
+                          <td className="p-2 text-right">{p.stock}</td>
                           <td className="p-2">
                             {p.image_url ? (
                               <img src={p.image_url} alt={p.name} className="w-8 h-8 object-cover rounded" />
